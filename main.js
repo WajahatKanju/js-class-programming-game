@@ -1,21 +1,58 @@
 /** @type {HTMLCanvasElement} */
 
+
 window.addEventListener("load", () => {
   const ctx = canvas.getContext("2d");
   const CANVAS_WIDTH = (ctx.canvas.width = innerWidth);
   const CANVAS_HEIGHT = (ctx.canvas.height = innerHeight);
-  let enemys = [];
   let previousTime = 0;
   let interval = 0;
 
+  function generateRandomBetween(min , max){
+    return Math.random() * (max - min) + min;
+  }
+  
+
+  class Game{
+    constructor(ctx){
+      this.ctx = ctx;
+      this.width = this.ctx.canvas.width;
+      this.height = this.ctx.canvas.height;
+      this.enemyTiming = 200;
+      this.timeToEnemy = 0;
+      this.enemys = [];
+    }
+    draw(){
+      this.ctx.clearRect(0, 0, this.width, this.height);
+      [...this.enemys].forEach(object => object.draw(this.ctx));
+      [...this.enemys].forEach(object => object.update());
+    }
+    update(deltaTime){
+      if(this.timeToEnemy > this.enemyTiming ){
+        this.enemys = this.enemys.filter(enemy => !enemy.markedForDeletion);
+        this.timeToEnemy = 0;
+        this.#addEnemy();
+        console.log(this.enemys);
+      }else{
+        this.timeToEnemy += deltaTime;
+      }
+      this.draw();
+    }
+
+    #addEnemy(){
+      this.enemys.push(new Enemy(this));
+    }
+  }
+
   class Enemy {
-    constructor() {
+    constructor(game) {
+      this.game = game;
       this.width = 100;
       this.height = 100;
       
       this.x = CANVAS_WIDTH;
-      this.y = Math.random() * CANVAS_WIDTH - this.width;
-      this.dx = Math.random() * 10;
+      this.y = generateRandomBetween(0, this.game.height - this.height);
+      this.dx = Math.random() * 10 + 5;
       this.markedForDeletion = false;
     }
     draw(ctx) {
@@ -29,20 +66,15 @@ window.addEventListener("load", () => {
     }
   }
 
+  let game = new Game(ctx);
+
   const animate = (timestamp) => {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     const deltaTime = timestamp - previousTime;
     interval += deltaTime;
     previousTime = timestamp;
-    if(interval > 1000){
-      enemys.push(new Enemy());
-      interval = 0;
-    }
-    enemys.forEach(enemy => enemy.update());
-    enemys.forEach(enemy => enemy.draw(ctx));
-    enemys = enemys.filter(enemy => !enemy.markedForDeletion);
-    console.log(enemys);
+    game.update(deltaTime);
   };
   animate(0);
 });
