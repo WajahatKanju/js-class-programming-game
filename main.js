@@ -37,7 +37,8 @@ window.addEventListener("load", () => {
     }
 
     #addEnemy() {
-      this.enemys.push(new Spider(this));
+      Math.random() > 0.5 ? this.enemys.push(new Ghost(this)) : this.enemys.push(new Spider(this)); 
+      // this.enemys.push(new Spider(this));
     }
   }
 
@@ -72,7 +73,10 @@ window.addEventListener("load", () => {
       this.spriteWidth = this.image.width / this.rows;
       this.spriteHeight = this.image.height / this.cols;
       this.sizeModifier = generateRandomBetween(0.3, 0.8);
-      this.maximumHeight = generateRandomBetween(0, game.ctx.canvas.height/2 + 100 );
+      this.maximumHeight = generateRandomBetween(
+        0,
+        game.ctx.canvas.height / 2 + 100
+      );
       this.width = this.spriteWidth * 0.5;
       this.height = this.spriteHeight * 0.5;
       this.frame = 0;
@@ -83,8 +87,8 @@ window.addEventListener("load", () => {
     }
     draw(ctx) {
       ctx.beginPath();
-      ctx.moveTo(this.x + this.width/2, 0);
-      ctx.lineTo(this.x + this.width/2, this.y);
+      ctx.moveTo(this.x + this.width / 2, 0);
+      ctx.lineTo(this.x + this.width / 2, this.y);
       ctx.stroke();
       ctx.drawImage(
         this.image,
@@ -98,19 +102,64 @@ window.addEventListener("load", () => {
         this.height
       );
     }
-    update(){
+    update() {
       super.update();
-      
+
       this.y += this.dy;
-      if(this.y > this.maximumHeight){
+      if (this.y > this.maximumHeight) {
         this.dy = -this.dy;
       }
-      if(this.y < -this.height*2){
+      if (this.y < -this.height * 2) {
         this.markedForDeletion = true;
       }
     }
   }
 
+  class Ghost extends Enemy {
+    constructor(game) {
+      super(game);
+      this.game = game;
+      this.image = ghost;
+      this.rows = 11;
+      this.cols = 1;
+      this.spriteWidth = this.image.width / this.rows;
+      this.spriteHeight = this.image.height / this.cols;
+      this.sizeModifier = generateRandomBetween(0.2, 0.5);
+      this.maximumHeight = generateRandomBetween(
+        0,
+        game.ctx.canvas.height / 2 + 100
+      );
+      this.width = this.spriteWidth * this.sizeModifier;
+      this.height = this.spriteHeight *this.sizeModifier;
+      this.frame = 0;
+      this.dx = generateRandomBetween(5, 7);
+      this.dy = generateRandomBetween(1, 3);
+      this.x = game.ctx.canvas.width;
+      this.y = generateRandomBetween(0, game.ctx.canvas.height - this.height*2);
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.drawImage(
+        this.image,
+        this.spriteWidth * this.frame,
+        0,
+        this.spriteWidth,
+        this.spriteHeight,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+        );
+        ctx.restore();
+    }
+    update() {
+      super.update();
+      this.x -= this.dx;
+      // if (this.x > 0) {
+      //   this.markedForDeletion = true;
+      // }
+    }
+  }
   let game = new Game(ctx);
 
   const animate = (timestamp) => {
