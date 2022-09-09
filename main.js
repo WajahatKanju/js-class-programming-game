@@ -38,6 +38,7 @@ window.addEventListener("load", () => {
 
     #addEnemy() {
       Math.random() > 0.5 ? this.enemys.push(new Ghost(this)) : this.enemys.push(new Spider(this)); 
+      console.log(this.enemys);
       // this.enemys.push(new Spider(this));
     }
   }
@@ -124,7 +125,7 @@ window.addEventListener("load", () => {
       this.cols = 1;
       this.spriteWidth = this.image.width / this.rows;
       this.spriteHeight = this.image.height / this.cols;
-      this.sizeModifier = generateRandomBetween(0.2, 0.5);
+      this.sizeModifier = generateRandomBetween(0.25, 0.45);
       this.maximumHeight = generateRandomBetween(
         0,
         game.ctx.canvas.height / 2 + 100
@@ -136,9 +137,11 @@ window.addEventListener("load", () => {
       this.dy = generateRandomBetween(1, 3);
       this.x = game.ctx.canvas.width;
       this.y = generateRandomBetween(0, game.ctx.canvas.height - this.height*2);
+      this.alpha = generateRandomBetween(0.4, 0.8);
     }
     draw(ctx) {
       ctx.save();
+      ctx.globalAlpha = this.alpha;
       ctx.drawImage(
         this.image,
         this.spriteWidth * this.frame,
@@ -155,9 +158,9 @@ window.addEventListener("load", () => {
     update() {
       super.update();
       this.x -= this.dx;
-      // if (this.x > 0) {
-      //   this.markedForDeletion = true;
-      // }
+      if (this.x < -this.width) {
+        this.markedForDeletion = true;
+      }
     }
   }
   let game = new Game(ctx);
